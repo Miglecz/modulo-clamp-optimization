@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import org.miglecz.optimization.genetic.operator.Crossovers;
 
 public class Program {
     private final List<Operator> list = new ArrayList<>();
@@ -14,17 +15,7 @@ public class Program {
     }
 
     public Program crossover(final Program p) {
-        final Random random = new Random();
-        int x = random.nextInt(this.list.size());
-        int y = random.nextInt(p.list.size());
-        final List<Operator> list = new ArrayList<>();
-        for (int i = 0; i <= x; i++) {
-            list.add(this.list.get(i));
-        }
-        for (int i = y; i < p.list.size(); i++) {
-            list.add(p.list.get(i));
-        }
-        return new Program(list);
+        return new Program(Crossovers.crossover(list, p.list));
     }
 
     public double evaluate(final Set<Map.Entry<Integer, Integer>> set) {
@@ -39,7 +30,7 @@ public class Program {
         return Operator.newInstance(new Random().nextInt(8));
     }
 
-    private Program(List<Operator> list) {
+    private Program(final List<Operator> list) {
         this.list.addAll(list);
     }
 

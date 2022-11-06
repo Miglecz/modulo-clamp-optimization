@@ -1,19 +1,19 @@
 package org.example;
 
-import static org.miglecz.optimization.Collect.toBestSolution;
-import static org.miglecz.optimization.TakeWhile.progressingIteration;
-import static org.miglecz.optimization.genetic.facade.GeneticBuilderFacade.builder;
+import static org.miglecz.optimization.genetic.GeneticOptimizationBuilder.builder;
+import static org.miglecz.optimization.stream.Collectors.toBestSolution;
 import java.util.Map;
 import java.util.Random;
 import org.miglecz.optimization.Optimization;
 import org.miglecz.optimization.Solution;
-import org.miglecz.optimization.genetic.facade.operator.Crossover;
-import org.miglecz.optimization.genetic.facade.operator.Factory;
-import org.miglecz.optimization.genetic.facade.operator.Fitness;
-import org.miglecz.optimization.genetic.facade.operator.Mutation;
+import org.miglecz.optimization.genetic.operator.Crossover;
+import org.miglecz.optimization.genetic.operator.Factory;
+import org.miglecz.optimization.genetic.operator.Fitness;
+import org.miglecz.optimization.genetic.operator.Mutation;
+import org.miglecz.optimization.stream.TakeWhiles;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         final Map<Integer, Integer> expected = Map.of(
             //1, 2,
             //2, 3,
@@ -40,23 +40,16 @@ public class Main {
             .withRandom(new Random())
             .withFactory(factory)
             .withFitness(fitness)
-            .withPopulation(50)
-            .withElite(1)
+            //.withPopulation(50)
+            .withElite(3)
             .withMutant(20, mutation)
-            .withOffspring(20, crossover)
-            .withImmigrant(20)
+            .withOffspring(50, crossover)
+            .withImmigrant(10)
             .build();
         final Solution<Program> best = optimization.stream()
-            .takeWhile(progressingIteration(1000))
-            .peek(iteration -> {
-                System.out.printf("iteration=%d pop=%d best=%s%n",
-                    iteration.getIndex(),
-                    iteration.getSolutions().size(),
-                    iteration.getBest().get()
-                );
-                //System.out.println(iteration);
-            })
-            .limit(20000)
+            .takeWhile(TakeWhiles.belowScore(0))
+            //.peek(System.out::println)
+            .peek(i -> System.out.println(i.toBestString()))
             .collect(toBestSolution());
         System.out.println("optimum " + best);
     }
